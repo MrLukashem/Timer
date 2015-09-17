@@ -84,6 +84,11 @@ namespace tmr {
 			m_delayThread.reset();
 			m_managerThread.reset();
 		}
+
+		inline void setID() {
+			m_id = m_free_id;
+			++m_free_id;
+		}
 	};
 
 	/*
@@ -104,8 +109,7 @@ namespace tmr {
 		m_id = DEFAULT_TIMER_ID;
 		m_delay = DEFAULT_TIMER_DELAY;
 		m_isReapitingTimer = DEFAULT_REAPITING_VALUE;
-		m_id = m_free_id;
-		++m_free_id;
+		setID();
 
 		m_delayFunction = [&](double delay, CallbackFunction cb) -> void {
 			auto first_time_point = std::chrono::steady_clock::now();
@@ -157,17 +161,30 @@ namespace tmr {
 		return m_id;
 	}
 
+	/*
+	Function returns a given in contructor callback.
+
+	@return: std::function<T> contains a callback.
+	*/
 	template <typename Function, typename... Args>
 	CallbackFunction Timer<Function, Args...>::getCallbackFunction() {
 		return m_callback;
 	}
 
+	/*
+	Create main thread manager.
+	*/
 	template <typename Function, typename... Args>
 	void Timer<Function, Args...>::startTimer() {
 		m_managerThread =
 			std::make_unique<std::thread>(m_managerFunction);
 	}
 
+	/*
+	Create main thread manager.
+
+	@param1: A dalay between calls of callback function.
+	*/
 	template <typename Function, typename... Args>
 	void Timer<Function, Args...>::startTimer(double delay) {
 		m_delay = delay;
